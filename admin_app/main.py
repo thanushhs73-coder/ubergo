@@ -24,10 +24,13 @@ async def startup():
     """Initialize database and recover instances on startup."""
     await init_db()
     
-    # Recover user and driver instances after restart
-    async with async_session() as db:
-        await spawn_all_user_instances(db)
-        await spawn_all_driver_instances(db)
+    # Only spawn instances in development/local mode
+    # Skip in production (Railway/Vercel) as they only support single process
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    if environment != "production":
+        async with async_session() as db:
+            await spawn_all_user_instances(db)
+            await spawn_all_driver_instances(db)
 
 
 @app.get("/", response_class=HTMLResponse)

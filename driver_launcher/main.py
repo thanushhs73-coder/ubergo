@@ -44,14 +44,16 @@ async def register_driver(name: str = Form(...), phone: str = Form(...), db: Asy
     driver_create = DriverCreate(name=name, phone=phone)
     driver = await create_driver(db, driver_create)
     
-    # Spawn the driver instance in background
-    try:
-        spawn_driver_instance(driver.id, driver.assigned_port)
-        # Give it a moment to start
-        await asyncio.sleep(1)
-    except Exception as e:
-        print(f"Error spawning driver instance: {e}")
-        # Still return the driver even if spawn fails
+    # Spawn the driver instance in background (only in development)
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    if environment != "production":
+        try:
+            spawn_driver_instance(driver.id, driver.assigned_port)
+            # Give it a moment to start
+            await asyncio.sleep(1)
+        except Exception as e:
+            print(f"Error spawning driver instance: {e}")
+            # Still return the driver even if spawn fails
     
     return driver
 

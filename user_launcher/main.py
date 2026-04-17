@@ -41,13 +41,15 @@ async def create_new_user(name: str = Form(...), db: AsyncSession = Depends(get_
     user_create = UserCreate(name=name)
     user = await create_user(db, user_create)
     
-    # Spawn the user instance in background
-    try:
-        spawn_user_instance(user.id, user.user_port)
-        # Give it a moment to start
-        await asyncio.sleep(1)
-    except Exception as e:
-        print(f"Error spawning user instance: {e}")
+    # Spawn the user instance in background (only in development)
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    if environment != "production":
+        try:
+            spawn_user_instance(user.id, user.user_port)
+            # Give it a moment to start
+            await asyncio.sleep(1)
+        except Exception as e:
+            print(f"Error spawning user instance: {e}")
         # Still return the user even if spawn fails
     
     return user
