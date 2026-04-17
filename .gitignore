@@ -10,30 +10,65 @@ dist/
 build/
 eggs/
 .eggs/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Environment
 .env
+.env.local
+.env.*.local
 .venv
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
+.DS_Store
 
 # Database
 *.db
 *.sqlite3
+*.sqlite
+*.sqlite-journal
 
 # Logs
 *.log
+logs/
 
 # OS
 .DS_Store
 Thumbs.db
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 
 # Project specific
 *.pdf
+chapter10_appendix.tex
+*.bak
+.env.example
+
+# Node (if frontend added later)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+/dist
+/build
+
+# Temporary files
+*.tmp
+*.swp
+*~
