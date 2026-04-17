@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.database import get_db, init_db, async_session
 from shared.crud import list_all_rides, list_all_drivers, list_all_users
 from shared.schemas import RideOut, DriverOut, UserOut
-from instance_recovery import spawn_all_user_instances, spawn_all_driver_instances
 import asyncio
 from typing import List
 
@@ -22,15 +21,32 @@ app = FastAPI(title="UBERGO Admin Dashboard")
 @app.on_event("startup")
 async def startup():
     """Initialize database and recover instances on startup."""
-    await init_db()
+    try:
+        await init_db()
+        print("✓ Database initialized successfully")
+    except Exception as e:
+        print(f"✗ Database initialization error: {e}")
     
     # Only spawn instances in development/local mode
     # Skip in production (Railway/Vercel) as they only support single process
     environment = os.getenv("ENVIRONMENT", "development").lower()
     if environment != "production":
-        async with async_session() as db:
-            await spawn_all_user_instances(db)
-            await spawn_all_driver_instances(db)
+        try:
+            # Import here to avoid import errors in production
+            from instance_recovery import spawn_all_user_instances, spawn_all_driver_instances
+            async with async_session() as db:
+                await spawn_all_user_instances(db)
+                await spawn_all_driver_instances(db)
+        except ImportError as e:
+            print(f"✗ Instance spawning import error (expected in production): {e}")
+        except Exception as e:
+            print(f"✗ Instance spawning error: {e}")
+
+
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint for Railway."""
+    return {"status": "ok", "service": "ubergo-admin"}
 
 
 @app.get("/", response_class=HTMLResponse)
