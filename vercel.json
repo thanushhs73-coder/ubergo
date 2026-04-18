@@ -1,0 +1,19 @@
+{
+  "buildCommand": "pip install -r requirements.txt",
+  "devCommand": "uvicorn api.index:app --reload --host 0.0.0.0 --port 3000",
+  "env": {
+    "ENVIRONMENT": "production",
+    "DATABASE_URL": "@database_url"
+  },
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.11"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    }
+  ]
+}
